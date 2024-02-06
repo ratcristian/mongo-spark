@@ -29,7 +29,7 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.catalyst.expressions.Attribute;
 import org.apache.spark.sql.types.StructType;
 import scala.collection.JavaConverters;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 
 /**
  * An InternalRow to Row function that uses a resolved and bound encoder for the given schema.
@@ -46,7 +46,8 @@ final class InternalRowToRowFunction implements Function<InternalRow, Row>, Seri
     List<Attribute> attributesList = Arrays.stream(schema.fields())
         .map(new StructFieldToAttributeFunction())
         .collect(Collectors.toList());
-    Seq<Attribute> attributeSeq = JavaConverters.asScalaBuffer(attributesList).toSeq();
+
+    Seq<Attribute> attributeSeq = JavaConverters.asScalaBuffer(attributesList).toList();
     ExpressionEncoder<Row> rowEncoder = ExpressionEncoder.apply(schema);
     this.deserializer =
         rowEncoder.resolveAndBind(attributeSeq, SimpleAnalyzer$.MODULE$).createDeserializer();
