@@ -36,6 +36,6 @@ class StructFieldToAttributeFunction implements Function<StructField, AttributeR
         field.nullable(),
         field.metadata(),
         ExprId$.MODULE$.apply(exprId.id()),
-        JavaConverters.asScala(Collections.<String>emptyList()).toSeq());
+        JavaConverters.asScalaBuffer(Collections.<String>emptyList()));
   }
 }
