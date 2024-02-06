@@ -29,7 +29,7 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.catalyst.expressions.Attribute;
 import org.apache.spark.sql.types.StructType;
 import scala.collection.JavaConverters;
-import scala.collection.immutable.Seq;
+import scala.collection.Seq;
 
 /**
  * An InternalRow to Row function that uses a resolved and bound encoder for the given schema.
