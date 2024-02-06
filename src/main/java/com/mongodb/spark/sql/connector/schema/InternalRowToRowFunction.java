@@ -18,14 +18,18 @@
 package com.mongodb.spark.sql.connector.schema;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.catalyst.analysis.SimpleAnalyzer$;
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder$;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.catalyst.expressions.Attribute;
 import org.apache.spark.sql.types.StructType;
+import scala.collection.JavaConverters;
 import scala.collection.immutable.Seq;
 
 /**
@@ -39,11 +43,12 @@ final class InternalRowToRowFunction implements Function<InternalRow, Row>, Seri
 
   private final ExpressionEncoder.Deserializer<Row> deserializer;
 
-  @SuppressWarnings("unchecked")
   InternalRowToRowFunction(final StructType schema) {
-    ExpressionEncoder<Row> rowEncoder = RowEncoder$.MODULE$.apply(schema);
-    Seq<Attribute> attributeSeq =
-        (Seq<Attribute>) (Seq<? extends Attribute>) rowEncoder.schema().toAttributes();
+    List<Attribute> attributesList = Arrays.stream(schema.fields())
+        .map(new StructFieldToAttributeFunction())
+        .collect(Collectors.toList());
+    Seq<Attribute> attributeSeq = JavaConverters.asScala(attributesList).toSeq();
+    ExpressionEncoder<Row> rowEncoder = RowEncoder.apply(schema);
     this.deserializer =
         rowEncoder.resolveAndBind(attributeSeq, SimpleAnalyzer$.MODULE$).createDeserializer();
   }
