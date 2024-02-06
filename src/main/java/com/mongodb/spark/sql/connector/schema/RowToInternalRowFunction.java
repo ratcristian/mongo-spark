@@ -26,7 +26,6 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.catalyst.analysis.SimpleAnalyzer$;
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
-import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.catalyst.expressions.Attribute;
 import org.apache.spark.sql.types.StructType;
 import scala.collection.JavaConverters;
@@ -47,8 +46,8 @@ final class RowToInternalRowFunction implements Function<Row, InternalRow>, Seri
     List<Attribute> attributesList = Arrays.stream(schema.fields())
         .map(new StructFieldToAttributeFunction())
         .collect(Collectors.toList());
-    Seq<Attribute> attributeSeq = JavaConverters.asScala(attributesList).toSeq();
-    ExpressionEncoder<Row> rowEncoder = RowEncoder.apply(schema);
+    Seq<Attribute> attributeSeq = JavaConverters.asScalaBuffer(attributesList).toSeq();
+    ExpressionEncoder<Row> rowEncoder = ExpressionEncoder.apply(schema);
     this.serializer =
         rowEncoder.resolveAndBind(attributeSeq, SimpleAnalyzer$.MODULE$).createSerializer();
   }
